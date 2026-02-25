@@ -1,0 +1,68 @@
+{
+  "name": "react-golang-electron",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Electron + React + Go sidecar desktop app",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:electron": "wait-on tcp:5173 && npm run build:sidecar:host && npm run build:electron && electron dist-electron/main.js",
+    "build": "npm run build:renderer && npm run build:electron && npm run build:sidecar:all",
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p tsconfig.node.json",
+    "build:sidecar:host": "node scripts/build-sidecar.mjs host",
+    "build:sidecar:all": "node scripts/build-sidecar.mjs all",
+    "preview": "vite preview",
+    "dist:mac": "npm run build && electron-builder --mac --universal"
+  },
+  "dependencies": {
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "24.6.1",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "5.0.4",
+    "concurrently": "9.2.1",
+    "electron": "40.6.0",
+    "electron-builder": "26.8.1",
+    "typescript": "5.9.3",
+    "vite": "7.3.1",
+    "wait-on": "9.0.4"
+  },
+  "build": {
+    "appId": "com.example.reactgolangelectron",
+    "productName": "ReactGolangElectron",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "dist-electron/**",
+      "package.json"
+    ],
+    "mac": {
+      "target": [
+        {
+          "target": "default",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "category": "public.app-category.developer-tools"
+    },
+    "extraResources": [
+      {
+        "from": "backend/bin/sidecar-darwin-arm64",
+        "to": "bin/sidecar-darwin-arm64"
+      },
+      {
+        "from": "backend/bin/sidecar-darwin-x64",
+        "to": "bin/sidecar-darwin-x64"
+      }
+    ]
+  }
+}
